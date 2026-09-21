@@ -1,0 +1,950 @@
+/* ============================================================
+   FLORES AMARILLAS — hoja de estilos
+   ============================================================ */
+
+:root {
+  --bg-main: #05070D;
+  --blue-night: #071A2C;
+  --yellow-floral: #FFD83D;
+  --yellow-bright: #FFF18A;
+  --green-stem: #397A45;
+  --gold: #F5C451;
+  --warm-white: #FFF8E7;
+
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Poppins", "Segoe UI", sans-serif;
+
+  --vh: 1vh; /* corregido por JS en moviles */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-main);
+  color: var(--warm-white);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------
+   Cielo nocturno de fondo (compartido por todas las escenas)
+   --------------------------------------------------------- */
+.night-sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(245, 196, 81, 0.06), transparent 55%),
+    linear-gradient(180deg, var(--bg-main) 0%, var(--blue-night) 55%, #0a1220 100%);
+  transition: filter 1.4s ease;
+}
+
+.night-sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 88%, rgba(245, 196, 81, 0.18), transparent 62%);
+  opacity: 0;
+  transition: opacity 2.4s ease;
+  pointer-events: none;
+}
+
+.night-sky.warm { filter: saturate(1.12) brightness(1.05); }
+.night-sky.warm::after { opacity: 1; }
+
+.night-sky .star {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px 1px rgba(245, 196, 81, 0.8);
+  animation: twinkle linear infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--warm-white);
+  border-radius: 50%;
+  box-shadow: 0 0 6px 2px rgba(255, 248, 231, 0.8);
+  animation: shoot 1.6s linear forwards;
+  z-index: 1;
+}
+
+.shooting-star::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 90px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 248, 231, 0.85), transparent);
+  transform-origin: left center;
+  transform: rotate(205deg);
+}
+
+@keyframes shoot {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(-240px, 160px); opacity: 0; }
+}
+
+/* ---------------------------------------------------------
+   Escenas genericas
+   --------------------------------------------------------- */
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.scene[hidden] { display: none !important; }
+
+/* ---------------------------------------------------------
+   Escena 1 - Intro
+   --------------------------------------------------------- */
+.intro-scene { gap: 42px; }
+
+.intro-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 4.4vw, 2.6rem);
+  color: var(--warm-white);
+  max-width: 22ch;
+  margin: 0;
+  min-height: 1.4em;
+  opacity: 0;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 24px rgba(255, 241, 138, 0.18);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  transform: translateY(10px);
+}
+
+.intro-text.intro-text--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.intro-text.intro-text--out {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.glow-btn {
+  position: relative;
+  padding: 16px 38px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  letter-spacing: 0.02em;
+  color: var(--bg-main);
+  background: linear-gradient(135deg, var(--yellow-bright), var(--yellow-floral) 60%, var(--gold));
+  box-shadow: 0 0 18px 2px rgba(255, 216, 61, 0.35), 0 0 46px 6px rgba(245, 196, 81, 0.18);
+  transition: box-shadow 0.35s ease, transform 0.25s ease, opacity 1.1s ease;
+  will-change: transform;
+}
+
+.glow-btn:hover {
+  box-shadow: 0 0 26px 4px rgba(255, 216, 61, 0.55), 0 0 60px 10px rgba(245, 196, 81, 0.3);
+}
+
+.glow-btn:active { transform: scale(0.96) !important; }
+
+.glow-btn.small {
+  padding: 13px 30px;
+  font-size: 0.92rem;
+}
+
+.ghost-btn {
+  padding: 14px 30px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 248, 231, 0.45);
+  color: var(--warm-white);
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  letter-spacing: 0.02em;
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.25s ease;
+  background: rgba(255, 248, 231, 0.03);
+}
+
+.ghost-btn:hover {
+  border-color: var(--gold);
+  background: rgba(245, 196, 81, 0.08);
+}
+
+.ghost-btn:active { transform: scale(0.96); }
+
+/* ---------------------------------------------------------
+   Escena 2/3 - Jardin
+   --------------------------------------------------------- */
+.garden-scene { padding: 0; }
+
+/* Capa exclusiva del ramo 3D: transparente, encima del jardín y debajo del HUD. */
+.bouquet-3d-container {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+}
+.bouquet-3d-container:not([hidden]) { display: block; }
+.bouquet-3d-container .bouquet-canvas { pointer-events: none; }
+.bouquet-3d-container .bouquet-ui { z-index: 9; }
+.bouquet-3d-container .bouquet-ui__hint,
+.bouquet-3d-container .bouquet-ui__final,
+.bouquet-3d-container .bouquet-ui__progress { pointer-events: none; }
+.garden-scene.bouquet-mode .garden-layer,
+.garden-scene.bouquet-mode .firefly-layer,
+.garden-scene.bouquet-mode .butterfly-layer,
+.garden-scene.bouquet-mode .petal-drift-layer,
+.garden-scene.bouquet-mode .particle-layer {
+  transition: opacity 1.6s ease;
+  opacity: 0;
+}
+.garden-scene.bouquet-mode .bouquet-3d-container { opacity: 1; }
+@media (max-width: 767px) {
+  .bouquet-3d-container { min-height: 100%; }
+  .bouquet-3d-container .bouquet-ui__card { width: min(88vw, 360px); padding: 20px 38px 20px 20px; }
+}
+
+/* Capa exclusiva del ramo 3D: transparente, encima del jardín y debajo del HUD. */
+.bouquet-3d-container {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+}
+
+.bouquet-3d-container:not([hidden]) { display: block; }
+.bouquet-3d-container .bouquet-canvas { pointer-events: none; }
+.bouquet-3d-container .bouquet-ui { z-index: 9; }
+.bouquet-3d-container .bouquet-ui__hint,
+.bouquet-3d-container .bouquet-ui__final,
+.bouquet-3d-container .bouquet-ui__progress { pointer-events: none; }
+
+.ground-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 260px;
+  height: 140px;
+  transform: translate(-50%, 40%);
+  background: radial-gradient(ellipse at center, rgba(255, 241, 138, 0.35), rgba(245, 196, 81, 0.08) 55%, transparent 75%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ground-glow.show {
+  animation: ground-pulse 1.8s ease forwards;
+}
+
+@keyframes ground-pulse {
+  0% { opacity: 0; transform: translate(-50%, 40%) scale(0.6); }
+  35% { opacity: 1; transform: translate(-50%, 40%) scale(1.05); }
+  100% { opacity: 0.55; transform: translate(-50%, 40%) scale(1); }
+}
+
+.seed-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.seed {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--yellow-bright), var(--gold) 70%);
+  box-shadow: 0 0 10px 3px rgba(245, 196, 81, 0.6);
+  transform: translate(-50%, 0);
+  animation: seed-fall 1.1s cubic-bezier(.55,0,.85,.35) forwards;
+}
+
+@keyframes seed-fall {
+  0% { top: 12%; opacity: 1; }
+  85% { top: 78%; opacity: 1; }
+  100% { top: 80%; opacity: 0; }
+}
+
+/* Flash dorado y onda de luz del momento de apertura en cascada */
+.cascade-flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.cascade-flash.flash {
+  animation: cascade-flash-anim 0.9s ease forwards;
+}
+
+@keyframes cascade-flash-anim {
+  0% { opacity: 0; background: radial-gradient(ellipse at 50% 78%, rgba(255,230,150,0), transparent 70%); }
+  18% { opacity: 1; background: radial-gradient(ellipse at 50% 78%, rgba(255,235,170,0.6), rgba(255,216,61,0.18) 45%, transparent 78%); }
+  100% { opacity: 0; }
+}
+
+.ground-wave {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  margin-bottom: -10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 241, 138, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 7;
+}
+
+.ground-wave.wave {
+  animation: ground-wave-anim 1.7s ease-out forwards;
+}
+
+@keyframes ground-wave-anim {
+  0% { width: 20px; height: 20px; margin-left: -10px; opacity: 0.9; border-width: 3px; }
+  100% { width: 1500px; height: 360px; margin-left: -750px; opacity: 0; border-width: 0.5px; }
+}
+
+.garden-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+}
+
+/* Capas de profundidad (fondo / medio / frente) para dar parallax */
+.depth-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: transform 0.5s ease-out;
+  will-change: transform;
+}
+
+.depth-layer-background { filter: blur(1.4px) saturate(0.85); opacity: 0.72; z-index: 1; }
+.depth-layer-midground { z-index: 2; }
+.depth-layer-foreground { filter: blur(1.1px) brightness(0.92); opacity: 0.94; z-index: 3; }
+
+/* --- Flor individual (SVG) --- */
+.flower {
+  position: absolute;
+  bottom: 0;
+  overflow: visible;
+  transform-origin: 50% 100%;
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+
+.flower.protagonist { z-index: 5; }
+
+.flower-sway {
+  animation: sway ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(var(--sway-a, -2deg)); }
+  50% { transform: rotate(var(--sway-b, 2deg)); }
+}
+
+.flower .stem {
+  fill: none;
+  stroke-width: 4.2;
+  stroke-linecap: round;
+}
+
+.flower.protagonist .stem { stroke-width: 5.5; }
+
+/* Hojas: arrancan "cerradas" (--leaf-closed, seteado por JS) y se
+   despliegan al crecer. */
+.flower .leaf {
+  opacity: 0;
+  transform: var(--leaf-closed, scale(0.2));
+  transition: opacity 0.75s ease, transform 0.9s cubic-bezier(.34,1.2,.4,1);
+}
+
+.flower.leaves-visible .leaf {
+  opacity: 1;
+  transform: none;
+}
+
+.flower .leaf-vein-line {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 0.7;
+}
+
+/* bloom-anchor: solo posicion (atributo SVG).
+   bloom: inclinacion (tilt) por CSS.
+   bloom-breathe: respiracion continua por CSS.
+   Separados para que ningun "transform" CSS pise a otro. */
+.flower .bloom {
+  transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+}
+
+.flower:hover .bloom,
+.flower.tilt .bloom { transform: rotate(var(--tilt, 0deg)); }
+
+.flower .bloom-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: breathe ease-in-out infinite;
+  animation-duration: 5s;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+
+.flower .petal {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  transform: scale(0.12);
+}
+
+.flower .petal-layer-back .petal {
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(.34,1.56,.64,1);
+  transition-delay: calc(var(--petal-i, 0) * 55ms);
+}
+
+.flower .petal-layer-front .petal {
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.34,1.56,.64,1);
+  transition-delay: calc(200ms + var(--petal-i, 0) * 55ms);
+}
+
+.flower.bloom-visible .petal {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.flower .petal-vein {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 0.6;
+  opacity: 0.5;
+}
+
+.flower .flower-center-group {
+  opacity: 0;
+  transform: scale(0.3);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(.34,1.56,.64,1);
+}
+
+.flower.center-visible .flower-center-group {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.flower .stamen {
+  stroke: #8a5a12;
+  stroke-width: 0.55;
+  opacity: 0.7;
+}
+
+.flower .stamen-tip { fill: #C98A24; }
+
+.flower .flower-halo {
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+
+.flower.halo-visible .flower-halo { opacity: 1; }
+
+/* Flor secreta: brillo muy sutil y distinto a las demas */
+.flower.secret .bloom {
+  filter: drop-shadow(0 0 4px rgba(255, 241, 138, 0.35));
+  animation: secret-glow 4.2s ease-in-out infinite;
+}
+
+@keyframes secret-glow {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 241, 138, 0.25)); }
+  50% { filter: drop-shadow(0 0 7px rgba(255, 241, 138, 0.45)); }
+}
+
+/* ---------------------------------------------------------
+   Narrativa (captions) y mensajes al tocar una flor
+   --------------------------------------------------------- */
+.story-caption {
+  position: absolute;
+  left: 50%;
+  top: 15%;
+  transform: translateX(-50%);
+  width: min(640px, 86vw);
+  max-width: 30ch;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.15rem, 3.2vw, 1.65rem);
+  color: var(--warm-white);
+  text-shadow: 0 0 18px rgba(255, 241, 138, 0.25);
+  opacity: 0;
+  transition: opacity 0.55s ease, transform 0.55s ease;
+  z-index: 9;
+  pointer-events: none;
+}
+
+.story-caption.visible { opacity: 1; }
+.story-caption[hidden] { display: none; }
+
+.story-caption--big {
+  font-style: normal;
+  font-weight: 600;
+  font-size: clamp(1.5rem, 4.6vw, 2.5rem);
+  color: var(--yellow-bright);
+  top: 40%;
+  max-width: 20ch;
+  text-shadow: 0 0 28px rgba(255, 216, 61, 0.3);
+}
+
+.tap-caption {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  transform: translateX(-50%);
+  width: min(520px, 86vw);
+  max-width: 40ch;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(0.9rem, 2.3vw, 1.05rem);
+  line-height: 1.4;
+  color: var(--warm-white);
+  background: rgba(5, 7, 13, 0.4);
+  padding: 11px 22px;
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  z-index: 9;
+  pointer-events: none;
+}
+
+.tap-caption.visible { opacity: 1; }
+.tap-caption[hidden] { display: none; }
+
+/* Particulas doradas, polen y onda de luz */
+.particle-layer, .firefly-layer, .butterfly-layer, .petal-drift-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.gold-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--yellow-bright), var(--gold) 70%, transparent);
+  box-shadow: 0 0 6px 1px rgba(245, 196, 81, 0.7);
+}
+
+.gold-particle.ambient {
+  animation: float-up linear infinite;
+}
+
+.gold-particle.pollen {
+  opacity: 0.55;
+  filter: blur(0.4px);
+  animation: float-up linear infinite;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(-70vh) translateX(var(--drift, 20px)); opacity: 0; }
+}
+
+.gold-particle.burst {
+  animation: burst-out 0.85s ease-out forwards;
+}
+
+@keyframes burst-out {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--bx), var(--by)) scale(0.2); opacity: 0; }
+}
+
+.light-ripple {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 241, 138, 0.8);
+  pointer-events: none;
+  animation: ripple-anim 0.9s ease-out forwards;
+}
+
+@keyframes ripple-anim {
+  0% { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(6); opacity: 0; }
+}
+
+/* Petalos sueltos atravesando la pantalla */
+.drift-petal {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  animation: drift-petal-move linear forwards;
+  filter: drop-shadow(0 0 3px rgba(255, 216, 61, 0.4));
+}
+
+@keyframes drift-petal-move {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: 0.85; }
+  90% { opacity: 0.65; }
+  100% { transform: translate(var(--travel-x), var(--travel-y)) rotate(var(--spin)); opacity: 0; }
+}
+
+/* Luciernagas */
+.firefly {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--yellow-bright);
+  box-shadow: 0 0 8px 3px rgba(255, 241, 138, 0.85);
+  animation: firefly-drift ease-in-out infinite, firefly-blink ease-in-out infinite;
+}
+
+@keyframes firefly-drift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(var(--fx1, 20px), var(--fy1, -18px)); }
+  50% { transform: translate(var(--fx2, -14px), var(--fy2, -30px)); }
+  75% { transform: translate(var(--fx3, 16px), var(--fy3, -10px)); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes firefly-blink {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 1; }
+}
+
+/* Mariposas */
+.butterfly {
+  position: absolute;
+  width: 22px;
+  height: 16px;
+  animation: butterfly-path linear infinite;
+}
+
+.butterfly .wing {
+  position: absolute;
+  top: 0;
+  width: 11px;
+  height: 16px;
+  background: linear-gradient(160deg, var(--yellow-bright), var(--yellow-floral));
+  box-shadow: 0 0 6px rgba(255, 216, 61, 0.5);
+  animation: wing-flap 0.32s ease-in-out infinite;
+}
+
+.butterfly .wing-left {
+  left: 0;
+  border-radius: 90% 10% 90% 10%;
+  transform-origin: right center;
+}
+
+.butterfly .wing-right {
+  right: 0;
+  border-radius: 10% 90% 10% 90%;
+  transform-origin: left center;
+  animation-delay: 0.02s;
+}
+
+@keyframes wing-flap {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.35); }
+}
+
+@keyframes butterfly-path {
+  0% { transform: translate(var(--p0x), var(--p0y)) rotate(-6deg); }
+  25% { transform: translate(var(--p1x), var(--p1y)) rotate(5deg); }
+  50% { transform: translate(var(--p2x), var(--p2y)) rotate(-4deg); }
+  75% { transform: translate(var(--p3x), var(--p3y)) rotate(6deg); }
+  100% { transform: translate(var(--p0x), var(--p0y)) rotate(-6deg); }
+}
+
+/* ---------------------------------------------------------
+   Boton de musica
+   --------------------------------------------------------- */
+.music-control {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--warm-white);
+  background: rgba(255, 248, 231, 0.06);
+  border: 1px solid rgba(255, 248, 231, 0.18);
+  backdrop-filter: blur(6px);
+  transition: background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+}
+
+.music-control:hover {
+  border-color: var(--gold);
+  background: rgba(245, 196, 81, 0.12);
+}
+
+.music-control.disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.music-control .icon { display: block; }
+
+/* ---------------------------------------------------------
+   Tarjeta secreta (vidrio esmerilado)
+   --------------------------------------------------------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(5, 7, 13, 0.55);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.overlay.visible { opacity: 1; }
+.overlay[hidden] { display: none !important; }
+
+.glass-card {
+  position: relative;
+  max-width: 440px;
+  width: 100%;
+  padding: 44px 34px 38px;
+  text-align: center;
+  border-radius: 24px;
+  background: rgba(255, 248, 231, 0.08);
+  border: 1px solid rgba(255, 248, 231, 0.25);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 0 40px rgba(245, 196, 81, 0.18), 0 20px 60px rgba(0,0,0,0.4);
+  transform: scale(0.92) translateY(10px);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(.34,1.56,.64,1), opacity 0.4s ease;
+}
+
+.overlay.visible .glass-card {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.secret-card-eyebrow { margin: 0 0 6px; font-size: 1.6rem; }
+
+.secret-card-title {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(1.2rem, 3.2vw, 1.5rem);
+  color: var(--yellow-bright);
+  margin: 0 0 16px;
+  line-height: 1.35;
+}
+
+.secret-card-dedication {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.02rem, 2.7vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--warm-white);
+  margin: 0;
+}
+
+.card-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--warm-white);
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.25s ease, background 0.25s ease;
+}
+
+.card-close:hover { opacity: 1; background: rgba(255,255,255,0.08); }
+
+/* ---------------------------------------------------------
+   Escena final
+   --------------------------------------------------------- */
+.final-scene {
+  z-index: 15;
+  gap: 20px;
+  background: radial-gradient(ellipse at 50% 40%, rgba(255, 216, 61, 0.05), transparent 60%);
+}
+
+.final-message {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 4.6vw, 2.4rem);
+  color: var(--yellow-bright);
+  text-shadow: 0 0 30px rgba(255, 216, 61, 0.35);
+  margin: 0;
+  max-width: 22ch;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: fade-in-up 1.4s ease 0.15s forwards;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.final-submessage {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+  color: rgba(255, 248, 231, 0.85);
+  margin: 0 0 6px;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: fade-in-up 1.4s ease 0.55s forwards;
+}
+
+.final-submessage[hidden] { display: none; }
+
+.final-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: fade-in-up 1.4s ease 0.95s forwards;
+}
+
+/* ---------------------------------------------------------
+   Toast
+   --------------------------------------------------------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(34px, env(safe-area-inset-bottom));
+  transform: translate(-50%, 12px);
+  z-index: 40;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: rgba(255, 248, 231, 0.95);
+  color: var(--bg-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast[hidden] { display: none; }
+
+/* ---------------------------------------------------------
+   Responsive
+   --------------------------------------------------------- */
+@media (max-width: 480px) {
+  .glow-btn { padding: 14px 30px; }
+  .final-actions { gap: 12px; }
+  .story-caption--big { top: 34%; }
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
+  .intro-scene { gap: 22px; }
+  .final-scene { gap: 10px; }
+  .music-control { width: 36px; height: 36px; }
+  .story-caption { top: 10%; }
+  .story-caption--big { top: 26%; }
+  .tap-caption { bottom: 4%; }
+}
+
+/* ---------------------------------------------------------
+   prefers-reduced-motion: version simplificada sin perder contenido
+   --------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.15s !important; }
+}
+
+body.reduced-motion .flower-sway,
+body.reduced-motion .bloom-breathe,
+body.reduced-motion .gold-particle.ambient,
+body.reduced-motion .gold-particle.pollen,
+body.reduced-motion .firefly,
+body.reduced-motion .butterfly,
+body.reduced-motion .drift-petal,
+body.reduced-motion .night-sky .star {
+  animation: none !important;
+}
+
+body.reduced-motion .flower.secret .bloom {
+  animation: none !important;
+  filter: drop-shadow(0 0 9px rgba(255, 241, 138, 0.6));
+}
+
+body.reduced-motion .depth-layer {
+  filter: none !important;
+  opacity: 1 !important;
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Flores Amarillas 💛</title>
+<meta name="description" content="Un pequeño regalo digital: un jardín de flores amarillas que crece delante de tus ojos." />
+<meta name="theme-color" content="#05070D" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Fondo compartido: cielo nocturno + destellos dorados -->
+  <div id="night-sky" class="night-sky" aria-hidden="true"></div>
+
+  <!-- Control de música (discreto, siempre visible) -->
+  <button id="music-control" class="music-control" type="button" aria-label="Activar música ambiental" title="Música ambiental">
+    <svg class="icon icon-sound-on" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/>
+      <path d="M16.5 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M19 6a9 9 0 0 1 0 12" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.6"/>
+    </svg>
+    <svg class="icon icon-sound-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" hidden>
+      <path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/>
+      <path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <main id="app" class="app">
+
+    <!-- ESCENA 1: Introducción -->
+    <section id="intro-scene" class="scene intro-scene" aria-label="Introducción">
+      <p class="intro-text" id="intro-text"></p>
+      <button id="discover-btn" class="glow-btn" type="button">
+        <span class="glow-btn-label" id="discover-btn-label"></span>
+      </button>
+    </section>
+
+    <!-- ESCENA 2 + 3: Nacimiento y jardín -->
+    <section id="garden-scene" class="scene garden-scene" hidden aria-label="Jardín de flores">
+      <div id="seed-layer" class="seed-layer" aria-hidden="true"></div>
+      <div id="ground-glow" class="ground-glow" aria-hidden="true"></div>
+      <div id="cascade-flash" class="cascade-flash" aria-hidden="true"></div>
+      <div id="ground-wave" class="ground-wave" aria-hidden="true"></div>
+      <div id="garden-layer" class="garden-layer"></div>
+      <div id="firefly-layer" class="firefly-layer" aria-hidden="true"></div>
+      <div id="butterfly-layer" class="butterfly-layer" aria-hidden="true"></div>
+      <div id="petal-drift-layer" class="petal-drift-layer" aria-hidden="true"></div>
+      <div id="particle-layer" class="particle-layer" aria-hidden="true"></div>
+      <div id="bouquet-3d-container" class="bouquet-3d-container" hidden aria-label="Ramo 3D interactivo"></div>
+      <p id="story-caption" class="story-caption" hidden aria-live="polite"></p>
+      <p id="tap-caption" class="tap-caption" hidden aria-live="polite"></p>
+    </section>
+
+    <!-- ESCENA 5: Tarjeta secreta -->
+    <div id="secret-card-overlay" class="overlay" hidden>
+      <div class="glass-card secret-card" role="dialog" aria-modal="true" aria-labelledby="secret-card-title">
+        <button class="card-close" id="secret-card-close" type="button" aria-label="Cerrar">✕</button>
+        <p class="secret-card-eyebrow">🌼</p>
+        <h2 id="secret-card-title" class="secret-card-title"></h2>
+        <p id="secret-card-dedication" class="secret-card-dedication"></p>
+      </div>
+    </div>
+
+    <!-- ESCENA FINAL -->
+    <section id="final-scene" class="scene final-scene" hidden aria-label="Mensaje final">
+      <h2 id="final-message" class="final-message"></h2>
+      <p id="final-submessage" class="final-submessage"></p>
+      <div class="final-actions">
+        <button id="restart-btn" class="ghost-btn" type="button"></button>
+        <button id="share-btn" class="glow-btn small" type="button"></button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  </main>
+
+  <!-- Audio ambiental (opcional). Ver /audio/README.md -->
+  <audio id="bg-audio" preload="none" loop></audio>
+
+  <script src="js/config.js"></script>
+  <script src="js/components/GoldenParticles.js"></script>
+  <script src="js/components/Fireflies.js"></script>
+  <script src="js/components/Butterfly.js"></script>
+  <script src="js/components/PetalDrift.js"></script>
+  <script src="js/components/StoryCaption.js"></script>
+  <script src="js/components/GrowingFlower.js"></script>
+  <script src="js/components/FlowerGarden.js"></script>
+  <script src="js/components/SecretFlowerCard.js"></script>
+  <script src="js/components/MusicControl.js"></script>
+  <script src="js/components/ShareButton.js"></script>
+  <script src="js/components/IntroScene.js"></script>
+  <!-- Three.js se importa una sola vez como módulo ES; los módulos legacy se cargan después -->
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js";
+    window.THREE = THREE;
+    const load = (src) => new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.body.appendChild(script);
+    });
+    (async () => {
+      try {
+        for (const src of [
+          "js/3d/BouquetGeometry.js",
+          "js/3d/FlowerObject.js",
+          "js/3d/ParticleSystem.js",
+          "js/3d/CameraController.js",
+          "js/3d/BouquetUI.js",
+          "js/3d/BouquetScene.js",
+          "js/FlowerExperience.js",
+          "js/main.js"
+        ]) await load(src);
+      } catch (error) {
+        console.error("No se pudieron cargar los módulos 3D; continúa la experiencia 2D.", error);
+        await load("js/FlowerExperience.js");
+        await load("js/main.js");
+      }
+    })();
+  </script>
+</body>
+</html>
