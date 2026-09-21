@@ -63,6 +63,7 @@
         isProtagonist: false,
         depthLayer: "midground",
         reducedMotion: false,
+        isMobile: false,
       },
       options || {}
     );
@@ -151,8 +152,18 @@
     });
     bloomBreathe.appendChild(halo);
 
-    // Centro: disco con textura de estambres
+    // Centro: disco con textura de estambres detallados
     var centerGroup = el("g", { class: "flower-center-group" });
+
+    // Sombra sutil detras del centro
+    var centerShadow = el("circle", {
+      class: "flower-center-shadow",
+      r: lenBack * 0.27,
+      fill: "url(#centerGrad-" + uid + ")",
+      opacity: 0.4,
+    });
+    centerGroup.appendChild(centerShadow);
+
     var centerDisc = el("circle", {
       class: "flower-center",
       r: lenBack * 0.26,
@@ -161,10 +172,10 @@
     centerGroup.appendChild(centerDisc);
 
     var stamens = el("g", { class: "stamens" });
-    var stamenCount = Math.round(lenBack * 0.55);
+    var stamenCount = Math.round(lenBack * 0.7); // mas estambres para mas detalle
     for (var si = 0; si < stamenCount; si++) {
-      var sAngle = (360 / stamenCount) * si + rnd(-4, 4);
-      var sLen = lenBack * 0.2 * rnd(0.75, 1.1);
+      var sAngle = (360 / stamenCount) * si + rnd(-5, 5);
+      var sLen = lenBack * 0.18 * rnd(0.8, 1.15);
       var rad = (sAngle * Math.PI) / 180;
       var sx = Math.cos(rad) * sLen;
       var sy = Math.sin(rad) * sLen;
@@ -174,9 +185,18 @@
         y1: 0,
         x2: sx,
         y2: sy,
+        stroke: "rgba(197, 138, 36, 0.7)",
+        "stroke-width": 0.7,
       });
       stamens.appendChild(stamenLine);
-      var tip = el("circle", { class: "stamen-tip", cx: sx, cy: sy, r: lenBack * 0.02 + 0.4 });
+      var tipRadius = lenBack * 0.025 + rnd(0.2, 0.6);
+      var tip = el("circle", {
+        class: "stamen-tip",
+        cx: sx,
+        cy: sy,
+        r: tipRadius,
+        fill: "#D4A044",
+      });
       stamens.appendChild(tip);
     }
     centerGroup.appendChild(stamens);
@@ -192,15 +212,19 @@
     var uid = this.uid;
     var defs = el("defs");
 
-    var petalGradBack = el("radialGradient", { id: "petalGradBack-" + uid, cx: "50%", cy: "12%", r: "85%" });
-    petalGradBack.appendChild(el("stop", { offset: "0%", "stop-color": palette.mid }));
-    petalGradBack.appendChild(el("stop", { offset: "65%", "stop-color": palette.edge }));
-    petalGradBack.appendChild(el("stop", { offset: "100%", "stop-color": palette.edge, "stop-opacity": 0.85 }));
+    // Gradiente trasero: mas sombrio, mas profundidad
+    var petalGradBack = el("radialGradient", { id: "petalGradBack-" + uid, cx: "45%", cy: "15%", r: "80%" });
+    petalGradBack.appendChild(el("stop", { offset: "0%", "stop-color": palette.bright }));
+    petalGradBack.appendChild(el("stop", { offset: "45%", "stop-color": palette.mid }));
+    petalGradBack.appendChild(el("stop", { offset: "75%", "stop-color": palette.edge }));
+    petalGradBack.appendChild(el("stop", { offset: "100%", "stop-color": palette.edge, "stop-opacity": 0.7 }));
     defs.appendChild(petalGradBack);
 
-    var petalGradFront = el("radialGradient", { id: "petalGradFront-" + uid, cx: "50%", cy: "10%", r: "90%" });
-    petalGradFront.appendChild(el("stop", { offset: "0%", "stop-color": palette.bright }));
-    petalGradFront.appendChild(el("stop", { offset: "55%", "stop-color": palette.mid }));
+    // Gradiente frontal: mas luminoso, mas vibrante
+    var petalGradFront = el("radialGradient", { id: "petalGradFront-" + uid, cx: "48%", cy: "8%", r: "92%" });
+    petalGradFront.appendChild(el("stop", { offset: "0%", "stop-color": "#FFFDEB" }));
+    petalGradFront.appendChild(el("stop", { offset: "30%", "stop-color": palette.bright }));
+    petalGradFront.appendChild(el("stop", { offset: "60%", "stop-color": palette.mid }));
     petalGradFront.appendChild(el("stop", { offset: "100%", "stop-color": palette.edge }));
     defs.appendChild(petalGradFront);
 
@@ -235,17 +259,33 @@
     for (var i = 0; i < count; i++) {
       var angle = (360 / count) * i + angleOffset + rnd(-3, 3);
       var petalGroup = el("g", { transform: "rotate(" + angle + ")" });
-      var petalWidth = len * rnd(0.34, 0.42);
+
+      // Petalo mas organico con forma mas realista (tipo gota)
+      var petalWidth = len * rnd(0.36, 0.46);
       var lenJitter = len * rnd(0.92, 1.08);
-      var asym = rnd(-0.12, 0.12); // asimetria sutil para que no sean clones
+      var asym = rnd(-0.15, 0.15);
+
+      // Forma de petalo mejorada: mas curvas organicas, puntiagudo arriba, ancho abajo
+      var p1_x = petalWidth * (0.8 + asym * 0.5);
+      var p1_y = -lenJitter * 0.25;
+      var p2_x = petalWidth * (0.95 + asym * 0.3);
+      var p2_y = -lenJitter * 0.65;
+      var p3_x = petalWidth * (0.7 + asym * 0.2);
+      var p3_y = -lenJitter * 0.95;
 
       var d =
         "M0,0" +
-        " C" + (petalWidth * (1 + asym)) + ",-" + lenJitter * 0.42 +
-        " " + (petalWidth * 0.9) + ",-" + lenJitter * 0.82 +
-        " 0,-" + lenJitter +
-        " C-" + (petalWidth * 0.9) + ",-" + lenJitter * 0.82 +
-        " -" + (petalWidth * (1 - asym)) + ",-" + lenJitter * 0.42 +
+        " C" + p1_x + "," + p1_y +
+        " " + p2_x + "," + p2_y +
+        " " + p3_x + "," + p3_y +
+        " C" + (p3_x * 0.5) + "," + (-lenJitter * 0.98) +
+        " " + (petalWidth * 0.3) + "," + (-lenJitter * 1.02) +
+        " 0," + (-lenJitter * 0.95) +
+        " C-" + (petalWidth * 0.3) + "," + (-lenJitter * 1.02) +
+        " -" + (p3_x * 0.5) + "," + (-lenJitter * 0.98) +
+        " -" + p3_x + "," + p3_y +
+        " C-" + p2_x + "," + p2_y +
+        " -" + p1_x + "," + p1_y +
         " 0,0 Z";
 
       var petal = el("path", {
@@ -256,14 +296,17 @@
       petal.style.setProperty("--petal-i", i);
       petal.style.setProperty("--petal-delay-scale", kind === "front" ? "1" : "0.7");
 
-      // Linea central sutil (nervadura del petalo) para dar detalle.
+      // Linea central (nervadura) + sombra sutil en bordes para profundidad
       var vein = el("line", {
         class: "petal-vein",
         x1: 0,
         y1: "-2",
         x2: 0,
-        y2: -lenJitter * 0.9,
+        y2: -lenJitter * 0.92,
+        stroke: "rgba(0,0,0,0.08)",
+        "stroke-width": "0.5",
       });
+
       petalGroup.appendChild(petal);
       petalGroup.appendChild(vein);
       layer.appendChild(petalGroup);
@@ -330,6 +373,7 @@
     }
 
     var stemDuration = this.opts.isProtagonist ? 1500 : 1000;
+    if (this.opts.isMobile) stemDuration = Math.round(stemDuration * 1.6);
 
     setTimeout(function () {
       stem.style.transition = "stroke-dashoffset " + stemDuration + "ms cubic-bezier(.4,.7,.3,1)";
@@ -357,6 +401,7 @@
     var a = (Math.random() * 3 + 1.5).toFixed(2);
     var b = (Math.random() * 3 + 1.5).toFixed(2);
     var duration = (3.5 + Math.random() * 2.5).toFixed(2);
+    if (this.opts.isMobile) duration = (parseFloat(duration) * 1.5).toFixed(2);
     var delay = (Math.random() * 2).toFixed(2);
     this.el.style.setProperty("--sway-a", "-" + a + "deg");
     this.el.style.setProperty("--sway-b", b + "deg");
@@ -366,7 +411,9 @@
 
     var breathe = this.el.querySelector(".bloom-breathe");
     if (breathe) {
-      breathe.style.animationDuration = (4 + Math.random() * 2.5).toFixed(2) + "s";
+      var breatheDuration = (4 + Math.random() * 2.5).toFixed(2);
+      if (this.opts.isMobile) breatheDuration = (parseFloat(breatheDuration) * 1.5).toFixed(2);
+      breathe.style.animationDuration = breatheDuration + "s";
       breathe.style.animationDelay = "-" + (Math.random() * 3).toFixed(2) + "s";
     }
   };

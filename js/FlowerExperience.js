@@ -12,6 +12,7 @@
     this.config = config;
     this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    this.isMobile = window.innerWidth <= 768;
 
     if (this.reducedMotion) {
       document.body.classList.add("reduced-motion");
@@ -36,10 +37,10 @@
     this.storyCaption = new window.StoryCaption(this.storyCaptionEl, { reducedMotion: this.reducedMotion });
     this.tapCaption = new window.StoryCaption(this.tapCaptionEl, { reducedMotion: this.reducedMotion });
 
-    this.particles = new window.GoldenParticles(this.particleLayerEl, { reducedMotion: this.reducedMotion });
-    this.fireflies = new window.Fireflies(this.fireflyLayerEl, { reducedMotion: this.reducedMotion });
-    this.butterflies = new window.Butterfly(this.butterflyLayerEl, { reducedMotion: this.reducedMotion });
-    this.petalDrift = new window.PetalDrift(this.petalDriftLayerEl, { reducedMotion: this.reducedMotion, maxActive: 5 });
+    this.particles = new window.GoldenParticles(this.particleLayerEl, { reducedMotion: this.reducedMotion, isMobile: this.isMobile });
+    this.fireflies = this.isMobile ? null : new window.Fireflies(this.fireflyLayerEl, { reducedMotion: this.reducedMotion });
+    this.butterflies = this.isMobile ? null : new window.Butterfly(this.butterflyLayerEl, { reducedMotion: this.reducedMotion });
+    this.petalDrift = this.isMobile ? null : new window.PetalDrift(this.petalDriftLayerEl, { reducedMotion: this.reducedMotion, maxActive: 5 });
 
     this.garden = new window.FlowerGarden({
       gardenLayer: this.gardenLayerEl,
@@ -48,6 +49,7 @@
       config: config,
       reducedMotion: this.reducedMotion,
       isTouch: this.isTouch,
+      isMobile: this.isMobile,
       onFlowerActivated: this._onFlowerActivated.bind(this),
       onSecretFound: this._onSecretFound.bind(this),
       onCascadeStart: this._onCascadeStart.bind(this),
@@ -204,11 +206,11 @@
 
     this.nightSkyEl.classList.add("warm");
 
-    this.fireflies.spawn(this.config.fireflyCount);
-    this.butterflies.spawn(this.config.butterflyCount);
-    this.particles.startAmbient(this.reducedMotion ? 8 : 20);
+    if (this.fireflies) this.fireflies.spawn(this.config.fireflyCount);
+    if (this.butterflies) this.butterflies.spawn(this.config.butterflyCount);
+    this.particles.startAmbient(this.isMobile ? 6 : (this.reducedMotion ? 8 : 20));
     this.particles.startPollen(this.reducedMotion ? 0 : 16);
-    this.petalDrift.start();
+    if (this.petalDrift) this.petalDrift.start();
 
     if (this.reducedMotion) return;
 
@@ -379,10 +381,10 @@
     }
 
     this.garden.clear();
-    this.fireflies.clear();
-    this.butterflies.clear();
+    if (this.fireflies) this.fireflies.clear();
+    if (this.butterflies) this.butterflies.clear();
     this.particles.clear();
-    this.petalDrift.clear();
+    if (this.petalDrift) this.petalDrift.clear();
     this.storyCaption.clear();
     this.tapCaption.clear();
     this.groundGlowEl.classList.remove("show");

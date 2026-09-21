@@ -18,6 +18,7 @@
     this.config = options.config;
     this.reducedMotion = options.reducedMotion;
     this.isTouch = options.isTouch;
+    this.isMobile = options.isMobile;
     this.onFlowerActivated = options.onFlowerActivated || function () {};
     this.onSecretFound = options.onSecretFound || function () {};
     this.onCascadeStart = options.onCascadeStart || function () {};
@@ -40,6 +41,7 @@
       isProtagonist: true,
       depthLayer: "midground",
       reducedMotion: this.reducedMotion,
+      isMobile: this.isMobile,
     });
     this.gardenLayer.appendChild(flower.el);
     flower.grow(onDone, 120);
@@ -73,59 +75,74 @@
     var positions = this._distributePositions(count);
     var remaining = count;
     var maxHeight = this._heightForViewport();
-    var cascadeSpread = this.reducedMotion ? 0 : Math.min(1500, 420 + count * 45);
+    var cascadeSpread = this.reducedMotion ? 0 : (this.isMobile ? Math.min(2800, 800 + count * 80) : Math.min(1500, 420 + count * 45));
 
     // Dispara el flash dorado + onda de luz apenas empieza la cascada.
     this.onCascadeStart();
 
-    var built = positions.map(function (leftPercent, i) {
-      var isSecret = i === self.secretIndex;
-      var depthRoll = Math.random();
-      var depthLayer = depthRoll < 0.22 ? "background" : depthRoll > 0.82 ? "foreground" : "midground";
+    var built = [];
+    var i = 0;
 
-      var scale;
-      if (depthLayer === "background") scale = 0.42 + Math.random() * 0.18;
-      else if (depthLayer === "foreground") scale = 0.85 + Math.random() * 0.35;
-      else scale = 0.6 + Math.random() * 0.32;
+    // Crear flores con delay para no bloquear el thread principal (especialmente en mobile)
+    var batchSize = this.isMobile ? 2 : 4;
+    var batchDelay = this.isMobile ? 50 : 30;
 
-      var petalCount = 7 + Math.floor(Math.random() * 4);
+    (function createBatch() {
+      for (var j = 0; j < batchSize && i < positions.length; j++, i++) {
+        var leftPercent = positions[i];
+        var isSecret = i === self.secretIndex;
+        var depthRoll = Math.random();
+        var depthLayer = depthRoll < 0.22 ? "background" : depthRoll > 0.82 ? "foreground" : "midground";
 
-      var flower = new window.GrowingFlower({
-        leftPercent: leftPercent,
-        heightPx: maxHeight * (0.3 + Math.random() * 0.22) * (depthLayer === "foreground" ? 1.15 : 1),
-        scale: scale,
-        petalCount: petalCount,
-        curve: Math.random() * 2 - 1,
-        isSecret: isSecret,
-        depthLayer: depthLayer,
-        reducedMotion: self.reducedMotion,
-      });
+        var scale;
+        if (depthLayer === "background") scale = 0.42 + Math.random() * 0.18;
+        else if (depthLayer === "foreground") scale = 0.85 + Math.random() * 0.35;
+        else scale = 0.6 + Math.random() * 0.32;
 
-      var container = self.layers[depthLayer];
-      container.appendChild(flower.el);
-      self._attachInteraction(flower, isSecret);
-      self.flowers.push(flower);
+        var petalCount = 7 + Math.floor(Math.random() * 4);
 
-      // Cascada desde el centro (50%) hacia los costados.
-      var distanceFromCenter = Math.abs(leftPercent - 50) / 50; // 0..1
-      var delay = self.reducedMotion
-        ? i * 35
-        : distanceFromCenter * cascadeSpread + Math.random() * 140;
+        var flower = new window.GrowingFlower({
+          leftPercent: leftPercent,
+          heightPx: maxHeight * (0.3 + Math.random() * 0.22) * (depthLayer === "foreground" ? 1.15 : 1),
+          scale: scale,
+          petalCount: petalCount,
+          curve: Math.random() * 2 - 1,
+          isSecret: isSecret,
+          depthLayer: depthLayer,
+          reducedMotion: self.reducedMotion,
+          isMobile: self.isMobile,
+        });
 
-      return { flower: flower, delay: delay };
-    });
+        var container = self.layers[depthLayer];
+        container.appendChild(flower.el);
+        self._attachInteraction(flower, isSecret);
+        self.flowers.push(flower);
 
-    built.forEach(function (item) {
-      item.flower.grow(function () {
-        item.flower.enableSway();
-        if (!self.reducedMotion) {
-          var c = item.flower.getBloomCenter();
-          self.particles.burst(c.x, c.y, 5);
-        }
-        remaining--;
-        if (remaining === 0 && onAllDone) onAllDone();
-      }, item.delay);
-    });
+        // Cascada desde el centro (50%) hacia los costados.
+        var distanceFromCenter = Math.abs(leftPercent - 50) / 50; // 0..1
+        var delay = self.reducedMotion
+          ? i * 35
+          : distanceFromCenter * cascadeSpread + Math.random() * 140;
+
+        built.push({ flower: flower, delay: delay });
+      }
+
+      if (i < positions.length) {
+        setTimeout(createBatch, batchDelay);
+      } else {
+        built.forEach(function (item) {
+          item.flower.grow(function () {
+            item.flower.enableSway();
+            if (!self.reducedMotion) {
+              var c = item.flower.getBloomCenter();
+              self.particles.burst(c.x, c.y, 5);
+            }
+            remaining--;
+            if (remaining === 0 && onAllDone) onAllDone();
+          }, item.delay);
+        });
+      }
+    })();
   };
 
   /** Crea (o reutiliza) los tres contenedores de profundidad. */

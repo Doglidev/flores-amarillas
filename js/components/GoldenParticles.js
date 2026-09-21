@@ -10,6 +10,7 @@
   function GoldenParticles(layerEl, options) {
     this.layer = layerEl;
     this.reducedMotion = (options && options.reducedMotion) || false;
+    this.isMobile = (options && options.isMobile) || false;
     this.ambientEls = [];
     this.ambientTimer = null;
   }
@@ -23,6 +24,7 @@
       return;
     }
     var total = count || 18;
+    if (this.isMobile) total = Math.ceil(total * 0.6);
     for (var j = 0; j < total; j++) {
       this._spawnAmbient(false);
     }
